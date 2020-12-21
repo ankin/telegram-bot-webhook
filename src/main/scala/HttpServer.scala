@@ -14,7 +14,6 @@ object HttpServer {
   private def create(config: Config)(implicit concurrentEffect: ConcurrentEffect[IO], timer: Timer[IO]): IO[ExitCode] = {
     val repository = new DateOfBirthRepository(config.dbFile)
     for {
-
       exitCode <- BlazeServerBuilder[IO]
         .bindHttp(config.server.port, config.server.host)
         .withHttpApp(new WebhookService(config.webhook.token, repository).routes.orNotFound).serve.compile.lastOrError

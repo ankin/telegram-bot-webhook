@@ -1,3 +1,4 @@
+
 lazy val commonSettings = Seq(
   name := "telegram-bot-webhook",
   version := "1.0-SNAPSHOT",
@@ -13,7 +14,7 @@ lazy val commonSettings = Seq(
 
 lazy val Http4sVersion = "0.21.1"
 
-lazy val DoobieVersion = "0.8.8"
+//lazy val DoobieVersion = "0.8.8"
 
 lazy val H2Version = "1.4.200"
 
@@ -24,6 +25,9 @@ lazy val CirceVersion = "0.13.0"
 lazy val PureConfigVersion = "0.12.3"
 
 lazy val LogbackVersion = "1.2.3"
+
+//lazy val Log4CatsVersion = "1.1.1"
+lazy val ScalaLoggingVersion = "3.9.2"
 
 lazy val ScalaTestVersion = "3.1.1"
 
@@ -39,6 +43,10 @@ lazy val root = (project in file("."))
       "org.http4s"            %% "http4s-circe"         % Http4sVersion,
       "org.http4s"            %% "http4s-dsl"           % Http4sVersion,
       "org.http4s"            %% "http4s-blaze-client"  % Http4sVersion     % "it,test",
+
+//      "io.chrisdavenport" %% "log4cats-core"            % Log4CatsVersion,
+//      "io.chrisdavenport" %% "log4cats-slf4j"           % Log4CatsVersion,
+      "com.typesafe.scala-logging" %% "scala-logging"   % ScalaLoggingVersion,
 
 //      "org.tpolecat"          %% "doobie-core"          % DoobieVersion,
 //      "org.tpolecat"          %% "doobie-h2"            % DoobieVersion,
@@ -62,3 +70,10 @@ lazy val root = (project in file("."))
       "org.scalamock"         %% "scalamock"            % ScalaMockVersion  % "test"
     )
   )
+
+assemblyMergeStrategy in assembly := {
+  case "META-INF/io.netty.versions.properties" => MergeStrategy.last
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
