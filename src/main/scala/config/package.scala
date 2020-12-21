@@ -9,7 +9,7 @@ package object config {
   case class ServerConfig(host: String ,port: Int)
   case class Webhook(token: String)
 
-  case class Config(server: ServerConfig, webhook: Webhook, dbFile: String)
+  case class Config(server: ServerConfig, webhook: Webhook)
 
   object Config {
     def load(configFile: String = "application.conf")(implicit cs: ContextShift[IO]): Resource[IO, Config] = {
