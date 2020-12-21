@@ -20,7 +20,7 @@ class WebhookService(token: String, repository: DateOfBirthRepository) extends H
 
 
   val routes = HttpRoutes.of[IO] {
-    case req@POST -> Root / "webhook" / token =>
+    case req@POST -> Root / "webhook" / this.token =>
       for {
         update <- req.decodeJson[Update]
         _ <- IO(logger.info(s"Received update message: [${update.asJson.noSpaces}]"))
