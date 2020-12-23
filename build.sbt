@@ -8,7 +8,8 @@ lazy val commonSettings = Seq(
     "-Xfatal-warnings",
     "-Ywarn-value-discard",
     "-Xlint:missing-interpolator",
-    "-Ymacro-annotations"
+    "-Ymacro-annotations",
+    "-unchecked"
   ),
 )
 
@@ -32,6 +33,8 @@ lazy val ScalaLoggingVersion = "3.9.2"
 lazy val ScalaTestVersion = "3.1.1"
 
 lazy val ScalaMockVersion = "4.4.0"
+
+lazy val RomeVersion = "1.15.0"
 
 lazy val root = (project in file("."))
   .configs(IntegrationTest)
@@ -65,6 +68,9 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig-cats-effect" % PureConfigVersion,
 
       "ch.qos.logback"        %  "logback-classic"      % LogbackVersion,
+
+
+      "com.rometools" % "rome" % RomeVersion,
 
       "org.scalatest"         %% "scalatest"            % ScalaTestVersion  % "it,test",
       "org.scalamock"         %% "scalamock"            % ScalaMockVersion  % "test"

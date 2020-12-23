@@ -22,38 +22,141 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
   private val service = new WebhookService(token, repository).routes
 
   "WebhookService" should {
-    "fire a request" in {
+    "handle text" in {
       val createJson =
         json"""
-        {
-        "update_id":646911460,
-        "message":{
-            "message_id":93,
-            "from":{
-                "id":10000123,
-                "is_bot":false,
-                "first_name":"Jiayu",
-                "username":"jiayu",
-                "language_code":"en-US"
-            },
+       {
+        "update_id":10000,
+          "message":{
+            "date":1441645532,
             "chat":{
-                "id":100001234,
-                "first_name":"Jiayu",
-                "username":"jiayu",
-                "type":"private"
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "type": "group"
             },
-            "date":1509641174,
-            "text":"eevee"
+            "message_id":1365,
+            "from":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "is_bot": false
+            },
+            "text":"/start"
+          }
         }
-    }
     """
       val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 100001234, text = "Hello there!"))
+      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Шо? '/start'\nЯ ще не знаю шо з тим робити :("))
+
     }
 
+    "handle /новини" in {
+      val createJson =
+        json"""
+       {
+        "update_id":10000,
+          "message":{
+            "date":1441645532,
+            "chat":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "type": "group"
+            },
+            "message_id":1365,
+            "from":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "is_bot": false
+            },
+            "entities": [{"type" : "bot_command"}],
+            "text":"/новини"
+          }
+        }
+    """
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
+      response.status shouldBe Status.Ok
+      response.as[Json].unsafeRunSync().as[SendMessage] match {
+        case Right(SendMessage(_, chatId, text)) =>
+          chatId shouldBe 1111111
+          text.contains("https://") shouldBe true
+        case Left(_) => fail()
+      }
+    }
+
+    "handle /бла-бла" in {
+      val createJson =
+        json"""
+       {
+        "update_id":10000,
+          "message":{
+            "date":1441645532,
+            "chat":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "type": "group"
+            },
+            "message_id":1365,
+            "from":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "is_bot": false
+            },
+            "entities": [{"type" : "bot_command"}],
+            "text":"/бла-бла"
+          }
+        }
+    """
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
+      response.status shouldBe Status.Ok
+      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /новини"))
+    }
+
+    "handle bold text" in {
+      val createJson =
+        json"""
+       {
+        "update_id":10000,
+          "message":{
+            "date":1441645532,
+            "chat":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "type": "group"
+            },
+            "message_id":1365,
+            "from":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "is_bot": false
+            },
+            "entities": [{"type" : "bold"}],
+            "text":"some text"
+          }
+        }
+    """
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
+      response.status shouldBe Status.Ok
+      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /новини"))
+    }
 
   }
+
 
   private def serve(request: Request[IO]): Response[IO] = {
     service.orNotFound(request).unsafeRunSync()
