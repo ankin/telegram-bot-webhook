@@ -54,7 +54,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
 
     }
 
-    "handle /новини" in {
+    "handle /novyny" in {
       val createJson =
         json"""
        {
@@ -77,7 +77,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
                "is_bot": false
             },
             "entities": [{"type" : "bot_command"}],
-            "text":"/новини"
+            "text":"/novyny"
           }
         }
     """
@@ -120,7 +120,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
     """
       val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /новини"))
+      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /novyny"))
     }
 
     "handle bold text" in {
@@ -152,7 +152,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
     """
       val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /новини"))
+      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /novyny"))
     }
 
   }

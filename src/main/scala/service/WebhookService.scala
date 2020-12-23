@@ -30,7 +30,7 @@ class WebhookService(token: String, repository: DateOfBirthRepository) extends H
     update.message.text match {
       case Some(text) =>
         update.message.entities match {
-          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text == "/новини" => CommandNews
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text == "/novyny" => CommandNews
           case Some(msgEntities) => ActionUnsupported
           case _ => TextMsg(text)
         }
@@ -45,7 +45,7 @@ class WebhookService(token: String, repository: DateOfBirthRepository) extends H
           news <- FeedParser.getNewsEntries("http://www.tagesschau.de/xml/rss2/")
         } yield SendMessage(chatId = chatId, text = news.map(n => s"${n.title}\n${n.link}").mkString("\n\n"))
       case TextMsg(text) => IO(SendMessage(chatId = chatId, text = s"Шо? '$text'\nЯ ще не знаю шо з тим робити :("))
-      case ActionUnsupported =>  IO(SendMessage(chatId = chatId, text = s"Я вмію тільки /новини"))
+      case ActionUnsupported =>  IO(SendMessage(chatId = chatId, text = s"Я вмію тільки /novyny"))
     }
   }
 
