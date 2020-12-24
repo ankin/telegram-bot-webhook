@@ -14,7 +14,7 @@ object HttpServer {
     for {
       exitCode <- BlazeServerBuilder[IO]
         .bindHttp(config.server.port, config.server.host)
-        .withHttpApp(new WebhookService(config.webhook.token, null).routes.orNotFound).serve.compile.lastOrError
+        .withHttpApp(new WebhookService(config.webhook.token).routes.orNotFound).serve.compile.lastOrError
     } yield exitCode
   }
 

@@ -1,17 +1,16 @@
 package service
 
 import cats.effect.IO
-import com.typesafe.scalalogging.LazyLogging
+import com.typesafe.scalalogging.StrictLogging
 import io.circe.syntax._
 import model._
 import org.http4s.HttpRoutes
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import repository.DateOfBirthRepository
 import rss.FeedParser
 
 
-class WebhookService(token: String, repository: DateOfBirthRepository) extends Http4sDsl[IO] with LazyLogging {
+class WebhookService(token: String) extends Http4sDsl[IO] with StrictLogging {
 
 
   val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
@@ -42,7 +41,7 @@ class WebhookService(token: String, repository: DateOfBirthRepository) extends H
     action match {
       case CommandNews =>
         for {
-          news <- FeedParser.top10NewsEntries("http://www.tagesschau.de/xml/rss2/")
+          news <- FeedParser.top10RssEntries("http://www.tagesschau.de/xml/rss2/")
         } yield SendMessage(chatId = chatId, text = news.map(n => s"${n.title}\n${n.link}").mkString("\n\n"))
       case TextMsg(text) => IO.pure(SendMessage(chatId = chatId, text = s"Шо? '$text'\nЯ ще не знаю шо з тим робити :("))
       case ActionUnsupported =>  IO.pure(SendMessage(chatId = chatId, text = s"Я вмію тільки /novyny"))

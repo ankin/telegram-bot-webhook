@@ -8,18 +8,15 @@ import org.http4s.circe._
 import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.{Request, Response, Status, Uri}
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import repository.DateOfBirthRepository
 
 import java.util.UUID
 
-class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
+class WebhookSpec extends AnyWordSpec with Matchers {
 
   private val token = UUID.randomUUID().toString
-  private val repository = stub[DateOfBirthRepository]
-  private val service = new WebhookService(token, repository).routes
+  private val service = new WebhookService(token).routes
 
   "WebhookService" should {
     "handle text" in {
@@ -48,7 +45,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
           }
         }
     """
-      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
       response.status shouldBe Status.Ok
       response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Шо? '/start'\nЯ ще не знаю шо з тим робити :("))
 
@@ -81,7 +78,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
           }
         }
     """
-      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
       response.status shouldBe Status.Ok
       response.as[Json].unsafeRunSync().as[SendMessage] match {
         case Right(SendMessage(_, chatId, text)) =>
@@ -118,7 +115,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
           }
         }
     """
-      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
       response.status shouldBe Status.Ok
       response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /novyny"))
     }
@@ -150,7 +147,7 @@ class WebhookSpec extends AnyWordSpec with MockFactory with Matchers {
           }
         }
     """
-      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/${token}")).withEntity(createJson))
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
       response.status shouldBe Status.Ok
       response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /novyny"))
     }

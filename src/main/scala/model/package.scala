@@ -2,7 +2,7 @@ import io.circe.generic.extras.{Configuration, ConfiguredJsonCodec}
 
 package object model {
 
-  case class DateOfBirth(dateOfBirth: String)
+
 
 
   implicit val customConfig = Configuration.default.withSnakeCaseMemberNames.withDefaults
