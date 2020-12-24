@@ -1,7 +1,6 @@
 package rss
 
-import cats.effect.IO
-import com.rometools.rome.feed.synd.{SyndEntry, SyndFeed}
+import cats.effect.{IO, Resource}
 import com.rometools.rome.io.{SyndFeedInput, XmlReader}
 
 import java.net.URL
@@ -10,22 +9,25 @@ import scala.jdk.CollectionConverters._
 object FeedParser {
 
 
-  def getNewsEntries(url: String): IO[List[NewsEntry]] = {
+  def top10NewsEntries(url: String): IO[List[NewsEntry]] = {
 
-    def buildWithUrl(feedInput: SyndFeedInput, url: String): IO[SyndFeed] = IO {
-      feedInput
-        .build(new XmlReader(new URL(url)))
+    def acquire = IO(new XmlReader(new URL(url)))
+    def release(reader: XmlReader) = IO(reader.close())
+    val readerRes = Resource.make(acquire)(release)
+
+    readerRes.use { xmlReader =>
+      IO {
+        new SyndFeedInput()
+          .build(xmlReader)
+          .getEntries
+          .asScala
+          .toList
+          .take(10)
+          .map { entry =>
+            NewsEntry(title = entry.getTitle, link = entry.getLink)
+          }
+      }
     }
-
-    def mapEntries(entries: java.util.List[SyndEntry]) = IO {
-      entries.asScala.toList.map(se => NewsEntry(se.getTitle, se.getLink))
-    }
-
-    for {
-      feedInput <- IO(new SyndFeedInput())
-      feed <- buildWithUrl(feedInput, url)
-      entries <- mapEntries(feed.getEntries)
-    } yield entries
   }
 
   case class NewsEntry(title: String, link: String)
