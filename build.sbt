@@ -19,6 +19,7 @@ lazy val RomeVersion = "1.15.0"
 lazy val CirceVersion = "0.13.0"
 lazy val PureConfigVersion = "0.12.3"
 lazy val LogbackVersion = "1.2.3"
+lazy val LogbackGCPVersion = "0.119.0-alpha"
 lazy val ScalaLoggingVersion = "3.9.2"
 lazy val ScalaTestVersion = "3.1.1"
 
@@ -48,6 +49,7 @@ lazy val root = (project in file("."))
 
       "com.typesafe.scala-logging" %% "scala-logging" % ScalaLoggingVersion,
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
+      "com.google.cloud" % "google-cloud-logging-logback"% LogbackGCPVersion,
 
       "org.scalatest" %% "scalatest" % ScalaTestVersion % "it,test",
     )
