@@ -57,6 +57,7 @@ lazy val root = (project in file("."))
 
 assemblyMergeStrategy in assembly := {
   case "META-INF/io.netty.versions.properties" => MergeStrategy.last
+  case "module-info.class" => MergeStrategy.discard
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)

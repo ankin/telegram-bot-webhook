@@ -41,6 +41,7 @@ object FeedParser extends StrictLogging {
     cache.get(url)
   }
 
+
   case class RssEntry(title: String, link: String)
 }
 
