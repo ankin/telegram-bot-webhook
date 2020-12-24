@@ -15,4 +15,6 @@ COPY --from=SBT_BUILD /telegram-bot-webhook/target/scala-2.13/telegram-bot-webho
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","/app.jar"]
+
+#ENTRYPOINT ["java", "-Dlogback.configurationFile=logback-console.xml", "-jar","/app.jar"]
+ENTRYPOINT ["java", "-jar","/app.jar"]

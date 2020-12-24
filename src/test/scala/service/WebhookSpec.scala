@@ -152,6 +152,17 @@ class WebhookSpec extends AnyWordSpec with Matchers {
       response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /novyny"))
     }
 
+
+    "handle broken json" in {
+      val createJson =
+        json"""
+       {
+        "text:"some text"
+       }
+    """
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
+      response.status shouldBe Status.InternalServerError
+    }
   }
 
 
