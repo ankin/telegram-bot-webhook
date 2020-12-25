@@ -154,14 +154,9 @@ class WebhookSpec extends AnyWordSpec with Matchers {
 
 
     "handle broken json" in {
-      val createJson =
-        json"""
-       {
-        "text:"some text"
-       }
-    """
+      val createJson = " {\"text:\"some text\"}"
       val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
-      response.status shouldBe Status.InternalServerError
+      response.status shouldBe Status.BadRequest
     }
   }
 
