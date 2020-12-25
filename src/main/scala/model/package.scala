@@ -2,9 +2,6 @@ import io.circe.generic.extras.{Configuration, ConfiguredJsonCodec}
 
 package object model {
 
-
-
-
   implicit val customConfig = Configuration.default.withSnakeCaseMemberNames.withDefaults
 
   // incoming
