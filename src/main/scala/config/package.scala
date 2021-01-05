@@ -8,8 +8,8 @@ import pureconfig.module.catseffect.syntax._
 package object config {
   case class ServerConfig(host: String ,port: Int)
   case class Webhook(token: String)
-
-  case class Config(server: ServerConfig, webhook: Webhook)
+  case class DatabaseConfig(driver: String, url: String, user: String, password: String, threadPoolSize: Int)
+  case class Config(server: ServerConfig, webhook: Webhook, database: DatabaseConfig)
 
   object Config {
     def load(configFile: String = "application.conf")(implicit cs: ContextShift[IO]): Resource[IO, Config] = {

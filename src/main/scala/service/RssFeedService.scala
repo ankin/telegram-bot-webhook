@@ -1,4 +1,4 @@
-package rss
+package service
 
 import cats.effect.{IO, Resource}
 import com.github.blemale.scaffeine.{LoadingCache, Scaffeine}
@@ -7,19 +7,21 @@ import com.typesafe.scalalogging.StrictLogging
 
 import java.net.URL
 import scala.concurrent.duration.DurationInt
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.ListHasAsScala
 
-object FeedParser extends StrictLogging {
+object RssFeedService extends StrictLogging {
 
 
   val cache: LoadingCache[String, IO[List[RssEntry]]] =
     Scaffeine()
       .expireAfterWrite(10.minutes)
       .maximumSize(10)
-      .build[String, IO[List[RssEntry]]] { url : String =>
+      .build[String, IO[List[RssEntry]]] { url: String =>
 
         def acquire = IO(new XmlReader(new URL(url)))
+
         def release(reader: XmlReader) = IO(reader.close())
+
         val readerRes = Resource.make(acquire)(release)
 
         readerRes.use { xmlReader =>
@@ -44,5 +46,3 @@ object FeedParser extends StrictLogging {
 
   case class RssEntry(title: String, link: String)
 }
-
-

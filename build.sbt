@@ -17,6 +17,9 @@ lazy val Http4sVersion = "0.21.1"
 lazy val ScaffeineVersion = "4.0.2"
 lazy val RomeVersion = "1.15.0"
 lazy val CirceVersion = "0.13.0"
+lazy val DoobieVersion = "0.9.4"
+lazy val PostgreSQLJDBCDriverVersion = "42.2.18"
+lazy val FlywayVersion = "7.3.2"
 lazy val PureConfigVersion = "0.12.3"
 lazy val LogbackVersion = "1.2.3"
 lazy val LogbackGCPVersion = "0.119.0-alpha"
@@ -43,6 +46,14 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-generic-extras" % CirceVersion,
       "io.circe" %% "circe-literal" % CirceVersion % "it,test",
       "io.circe" %% "circe-optics" % CirceVersion % "it",
+
+      "org.tpolecat" %% "doobie-core" % DoobieVersion,
+      "org.tpolecat" %% "doobie-hikari" % DoobieVersion,
+      "org.tpolecat" %% "doobie-postgres" % DoobieVersion,
+
+      "org.postgresql" % "postgresql" % PostgreSQLJDBCDriverVersion,
+
+      "org.flywaydb" % "flyway-core" % FlywayVersion,
 
       "com.github.pureconfig" %% "pureconfig" % PureConfigVersion,
       "com.github.pureconfig" %% "pureconfig-cats-effect" % PureConfigVersion,

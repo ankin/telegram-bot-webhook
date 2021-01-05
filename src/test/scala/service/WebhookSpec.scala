@@ -1,5 +1,6 @@
 package service
 
+import api.WebhookApi
 import cats.effect.IO
 import io.circe.Json
 import io.circe.literal._
@@ -16,7 +17,7 @@ import java.util.UUID
 class WebhookSpec extends AnyWordSpec with Matchers {
 
   private val token = UUID.randomUUID().toString
-  private val service = new WebhookService(token).routes
+  private val service = new WebhookApi(token, null).routes
 
   "WebhookService" should {
     "handle text" in {
@@ -75,6 +76,43 @@ class WebhookSpec extends AnyWordSpec with Matchers {
             },
             "entities": [{"type" : "bot_command"}],
             "text":"/novyny"
+          }
+        }
+    """
+      val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
+      response.status shouldBe Status.Ok
+      response.as[Json].unsafeRunSync().as[SendMessage] match {
+        case Right(SendMessage(_, chatId, text)) =>
+          chatId shouldBe 1111111
+          text.contains("https://") shouldBe true
+        case Left(_) => fail()
+      }
+    }
+
+    "handle /novyny command within text" in {
+      val createJson =
+        json"""
+       {
+        "update_id":10000,
+          "message":{
+            "date":1441645532,
+            "chat":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "type": "group"
+            },
+            "message_id":1365,
+            "from":{
+               "last_name":"Test Lastname",
+               "id":1111111,
+               "first_name":"Test",
+               "username":"Test",
+               "is_bot": false
+            },
+            "entities": [{"type" : "bot_command"}],
+            "text":"bla bla bla /novyny"
           }
         }
     """

@@ -1,5 +1,4 @@
-package service
-
+package api
 
 import cats.effect.IO
 import com.typesafe.scalalogging.StrictLogging
@@ -8,10 +7,10 @@ import model._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, MalformedMessageBodyFailure}
-import rss.FeedParser
+import service.{ReminderService, RssFeedService}
 
 
-class WebhookService(token: String) extends Http4sDsl[IO] with StrictLogging {
+class WebhookApi(token: String, reminderService: ReminderService) extends Http4sDsl[IO] with StrictLogging {
 
 
   val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
@@ -36,14 +35,15 @@ class WebhookService(token: String) extends Http4sDsl[IO] with StrictLogging {
   }
 
   private def extractAction(update: Update): IO[Action] = IO {
-    update.message.text match {
-      case Some(text) =>
+    (update.message.text, update.message.from) match {
+      case (Some(text), Some(user)) =>
         update.message.entities match {
-          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text == "/novyny" => CommandNews
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.contains("/novyny") => CommandNews
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.contains("/nagadai") => CommandCreateReminder(chatId = update.message.chat.id, userId = user.id, text = text)
           case Some(_) => ActionUnsupported
           case _ => TextMsg(text)
         }
-      case None => ActionUnsupported
+      case _ => ActionUnsupported
     }
   }
 
@@ -51,21 +51,12 @@ class WebhookService(token: String) extends Http4sDsl[IO] with StrictLogging {
     action match {
       case CommandNews =>
         for {
-          news <- FeedParser.top10RssEntries("http://www.tagesschau.de/xml/rss2/")
+          news <- RssFeedService.top10RssEntries("http://www.tagesschau.de/xml/rss2/")
         } yield SendMessage(chatId = chatId, text = news.map(n => s"${n.title}\n${n.link}").mkString("\n\n"))
+      case commandReminder: CommandCreateReminder => reminderService.createReminder(commandReminder)
       case TextMsg(text) => IO.pure(SendMessage(chatId = chatId, text = s"Шо? '$text'\nЯ ще не знаю шо з тим робити :("))
       case ActionUnsupported => IO.pure(SendMessage(chatId = chatId, text = s"Я вмію тільки /novyny"))
     }
   }
-
-  sealed trait Action
-  final object ActionUnsupported extends Action
-
-  sealed trait Command extends Action
-  final object CommandNews extends Command
-
-  sealed trait Text extends Action
-  case class TextMsg(text: String) extends Text
-
 
 }
