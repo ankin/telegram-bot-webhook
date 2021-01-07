@@ -39,7 +39,9 @@ class WebhookApi(token: String, reminderService: ReminderService) extends Http4s
       case (Some(text), Some(user)) =>
         update.message.entities match {
           case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.contains("/novyny") => CommandNews
-          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.contains("/nagadai") => CommandCreateReminder(chatId = update.message.chat.id, userId = user.id, text = text)
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith("/nagadai+") => CommandCreateReminder(chatId = update.message.chat.id, userId = user.id, text = text)
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith("/nagadai-") => CommandDeleteReminder(chatId = update.message.chat.id, userId = user.id, text = text)
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith("/nagadai?") => CommandShowReminders(chatId = update.message.chat.id, userId = user.id)
           case Some(_) => ActionUnsupported
           case _ => TextMsg(text)
         }
@@ -53,7 +55,7 @@ class WebhookApi(token: String, reminderService: ReminderService) extends Http4s
         for {
           news <- RssFeedService.top10RssEntries("http://www.tagesschau.de/xml/rss2/")
         } yield SendMessage(chatId = chatId, text = news.map(n => s"${n.title}\n${n.link}").mkString("\n\n"))
-      case commandReminder: CommandCreateReminder => reminderService.createReminder(commandReminder)
+      case command: CommandReminder => reminderService.process(command)
       case TextMsg(text) => IO.pure(SendMessage(chatId = chatId, text = s"Шо? '$text'\nЯ ще не знаю шо з тим робити :("))
       case ActionUnsupported => IO.pure(SendMessage(chatId = chatId, text = s"Я вмію тільки /novyny"))
     }

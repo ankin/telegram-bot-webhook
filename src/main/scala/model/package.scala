@@ -1,7 +1,6 @@
 import io.circe.generic.extras.{Configuration, ConfiguredJsonCodec}
 
 import java.time.{LocalDate, LocalDateTime}
-import java.util.Date
 
 package object model {
 
@@ -57,7 +56,11 @@ package object model {
 
   sealed trait Command extends Action
   final object CommandNews extends Command
-  final case class CommandCreateReminder(chatId: Int, userId: Int, text: String) extends Command
+
+  sealed trait CommandReminder extends Command
+  final case class CommandCreateReminder(chatId: Int, userId: Int, text: String) extends CommandReminder
+  final case class CommandDeleteReminder(chatId: Int, userId: Int, text: String) extends CommandReminder
+  final case class CommandShowReminders(chatId: Int, userId: Int) extends CommandReminder
 
   sealed trait Text extends Action
   case class TextMsg(text: String) extends Text
@@ -76,5 +79,6 @@ package object model {
                        executedAt: Option[LocalDateTime] = None
                      )
 
+  case object ReminderNotFound
 
 }

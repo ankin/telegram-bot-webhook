@@ -9,7 +9,8 @@ lazy val commonSettings = Seq(
     "-Ywarn-value-discard",
     "-Xlint:missing-interpolator",
     "-Ymacro-annotations",
-    "-unchecked"
+    "-unchecked",
+    "-Wunused:imports"
   ),
 )
 
@@ -44,8 +45,8 @@ lazy val root = (project in file("."))
 
       "io.circe" %% "circe-generic" % CirceVersion,
       "io.circe" %% "circe-generic-extras" % CirceVersion,
-      "io.circe" %% "circe-literal" % CirceVersion % "it,test",
-      "io.circe" %% "circe-optics" % CirceVersion % "it",
+      "io.circe" %% "circe-literal" % CirceVersion % "test",
+      "io.circe" %% "circe-parser" % CirceVersion % "test",
 
       "org.tpolecat" %% "doobie-core" % DoobieVersion,
       "org.tpolecat" %% "doobie-hikari" % DoobieVersion,

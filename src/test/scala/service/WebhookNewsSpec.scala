@@ -14,7 +14,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import java.util.UUID
 
-class WebhookSpec extends AnyWordSpec with Matchers {
+class WebhookNewsSpec extends AnyWordSpec with Matchers {
 
   private val token = UUID.randomUUID().toString
   private val service = new WebhookApi(token, null).routes
