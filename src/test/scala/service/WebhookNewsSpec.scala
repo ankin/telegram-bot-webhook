@@ -2,6 +2,7 @@ package service
 
 import api.WebhookApi
 import cats.effect.IO
+import config.Webhook
 import io.circe.Json
 import io.circe.literal._
 import model.SendMessage
@@ -17,7 +18,7 @@ import java.util.UUID
 class WebhookNewsSpec extends AnyWordSpec with Matchers {
 
   private val token = UUID.randomUUID().toString
-  private val service = new WebhookApi(token, null).routes
+  private val service = new WebhookApi(Webhook(token, Set.empty), null).routes
 
   "WebhookService" should {
     "handle text" in {

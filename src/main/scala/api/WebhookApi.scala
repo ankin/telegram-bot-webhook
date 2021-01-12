@@ -1,37 +1,61 @@
 package api
 
+
 import cats.effect.IO
 import com.typesafe.scalalogging.StrictLogging
+import config.Webhook
+import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
 import model._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{HttpRoutes, MalformedMessageBodyFailure}
+import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, MalformedMessageBodyFailure, Status}
 import service.{ReminderService, RssFeedService}
 
 
-class WebhookApi(token: String, reminderService: ReminderService) extends Http4sDsl[IO] with StrictLogging {
+class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) extends Http4sDsl[IO] with StrictLogging {
+
+  implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[IO, A] = jsonOf[IO, A]
+  implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[IO, A] = jsonEncoderOf[IO, A]
 
 
   val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case req@POST -> Root / "webhook" / this.token =>
-      val requestHandler = for {
-        update <- req.decodeJson[Update]
-        _ <- IO(logger.info(s"Received update message: [${update.asJson.noSpaces}]"))
-        action <- extractAction(update)
-        responseEntity <- createResponse(action, update.message.chat.id)
-        response <- Ok(responseEntity.asJson)
-        _ <- IO(logger.info(s"Sending response [$response]"))
-      } yield response
+    case req@POST -> Root / "webhook" / this.webhookConfig.token =>
 
-      requestHandler.handleErrorWith {
-        case e: MalformedMessageBodyFailure =>
-          logger.error("Failed to parse request body", e)
-          BadRequest("Invalid JSON")
-        case e: Throwable =>
-          logger.error("Unexpected error in webhook router", e)
-          InternalServerError("Unexpected error occurred")
+
+      req.decode[Update] { update =>
+
+        if (webhookConfig.chatAllowList.contains(update.message.chat.id)) {
+          // TODO add test
+          logger.info(s"Unsupported chat with id=[${update.message.chat.id}]. Ignoring message")
+          Forbidden()
+        } else {
+          val requestHandler = for {
+            _ <- IO(logger.info(s"Received update message: [${update.asJson.noSpaces}]"))
+            action <- extractAction(update)
+            responseEntity <- createResponse(action, update.message.chat.id)
+            response <- Ok(responseEntity)
+            _ <- IO(logger.info(s"Sending response [$response]"))
+          } yield response
+
+          requestHandler.handleErrorWith {
+            case e: MalformedMessageBodyFailure =>
+              logger.error("Failed to parse request body", e)
+              BadRequest("Invalid JSON")
+            case e: Throwable =>
+              logger.error("Unexpected error in webhook router", e)
+              InternalServerError("Unexpected error occurred")
+          }
+        }
       }
+
+
+  }
+
+  private def checkIfAllowed(chatId: Int, allowList: Set[Int], update: Update): Either[Status.BadRequest.type, Update] = {
+    Either.cond(allowList.contains(chatId), update, BadRequest)
+
+
   }
 
   private def extractAction(update: Update): IO[Action] = IO {

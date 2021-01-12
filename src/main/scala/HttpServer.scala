@@ -30,7 +30,7 @@ object HttpServer {
       repository = new ReminderRepository(resources.transactor)
       exitCode <- BlazeServerBuilder[IO]
         .bindHttp(resources.config.server.port, resources.config.server.host)
-        .withHttpApp(new WebhookApi(resources.config.webhook.token, new ReminderService(repository)).routes.orNotFound).serve.compile.lastOrError
+        .withHttpApp(new WebhookApi(resources.config.webhook, new ReminderService(repository)).routes.orNotFound).serve.compile.lastOrError
     } yield exitCode
   }
 

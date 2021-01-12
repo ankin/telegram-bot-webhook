@@ -2,6 +2,7 @@ package service
 
 import api.WebhookApi
 import cats.effect.IO
+import config.Webhook
 import io.circe.Json
 import model.{Reminder, ReminderNotFound, SendMessage}
 import org.http4s.circe._
@@ -20,7 +21,7 @@ import scala.collection.mutable
 class WebhookReminderSpec extends AnyWordSpec with Matchers {
 
   private val token = UUID.randomUUID().toString
-  val db = mutable.HashMap[Long, Reminder]()
+  private val db = mutable.HashMap[Long, Reminder]()
   private val reminderRepository = new ReminderRepository(null) {
     val ids = new AtomicLong(0L)
 
@@ -52,7 +53,7 @@ class WebhookReminderSpec extends AnyWordSpec with Matchers {
   }
 
   private val reminderService = new ReminderService(reminderRepository)
-  private val service = new WebhookApi(token, reminderService).routes
+  private val service = new WebhookApi(Webhook(token, Set.empty), reminderService).routes
 
   "WebhookReminderSpec" should {
 
