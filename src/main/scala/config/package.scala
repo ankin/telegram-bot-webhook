@@ -7,7 +7,7 @@ import pureconfig.module.catseffect.syntax._
 
 package object config {
   case class ServerConfig(host: String, port: Int)
-  case class Webhook(token: String, chatAllowList: Set[Int])
+  case class Webhook(token: String, chatAllowList: List[Int])
   case class DatabaseConfig(driver: String, url: String, user: String, password: String, threadPoolSize: Int)
   case class Config(server: ServerConfig, webhook: Webhook, database: DatabaseConfig)
 
