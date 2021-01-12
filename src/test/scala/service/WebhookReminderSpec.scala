@@ -22,7 +22,7 @@ class WebhookReminderSpec extends AnyWordSpec with Matchers {
 
   private val token = UUID.randomUUID().toString
   private val db = mutable.HashMap[Long, Reminder]()
-  private val reminderRepository = new ReminderRepository(null) {
+  private val reminderRepository: ReminderRepository = new ReminderRepository(null) {
     val ids = new AtomicLong(0L)
 
     override def create(reminder: Reminder): IO[Long] = {
@@ -53,7 +53,7 @@ class WebhookReminderSpec extends AnyWordSpec with Matchers {
   }
 
   private val reminderService = new ReminderService(reminderRepository)
-  private val service = new WebhookApi(Webhook(token, Set.empty), reminderService).routes
+  private val service = new WebhookApi(Webhook(token, List.empty), reminderService).routes
 
   "WebhookReminderSpec" should {
 
