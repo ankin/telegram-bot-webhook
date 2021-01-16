@@ -17,7 +17,7 @@ class ReminderRepository(transactor: Transactor[IO]) {
   }
 
   def getReminders(chatId: Int, userId: Int): Stream[IO, Reminder] = {
-    sql"SELECT * FROM reminder where chatId = $chatId and userId = $userId".query[Reminder].stream.transact(transactor)
+    sql"SELECT * FROM reminder where chatId = $chatId and createdBy = $userId".query[Reminder].stream.transact(transactor)
   }
 
   def create(reminder: Reminder): IO[Long] = {
@@ -27,7 +27,7 @@ class ReminderRepository(transactor: Transactor[IO]) {
   }
 
   def delete(chatId: Int, userId: Int, remindAt: LocalDate): IO[Either[model.ReminderNotFound.type, Int]] = {
-    sql"DELETE FROM reminder where chatId = $chatId and userId = $userId and remindAt = $remindAt".update.run.transact(transactor).map{affectedRows =>
+    sql"DELETE FROM reminder where chatId = $chatId and createdBy = $userId and remindAt = $remindAt".update.run.transact(transactor).map{affectedRows =>
       if (affectedRows > 0) {
         Right(affectedRows)
       } else {
