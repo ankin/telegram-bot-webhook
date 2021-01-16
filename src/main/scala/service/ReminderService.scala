@@ -4,15 +4,15 @@ import cats.effect.IO
 import com.typesafe.scalalogging.StrictLogging
 import model.{CommandCreateReminder, CommandDeleteReminder, CommandReminder, CommandShowReminders, Reminder, SendMessage}
 import repository.ReminderRepository
-import service.ReminderService.{ReminderError, commandStr, invalidDateError, notEnoughArgsError, reminderDateFormatter}
+import service.ReminderService.{ReminderError, invalidDateError, notEnoughArgsError, reminderDateFormatter}
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.util.Try
 
-// /nagadai+ 13.02.2021 Valentine's Day
-// /nagadai- 13.02.2021
-// /nagadai?
+// /reminder_add 13.02.2021 Valentine's Day
+// /reminder_del 13.02.2021
+// /reminder_list
 
 class ReminderService(repository: ReminderRepository) extends StrictLogging {
 
@@ -26,7 +26,7 @@ class ReminderService(repository: ReminderRepository) extends StrictLogging {
   }
 
   private def createReminder(command: CommandCreateReminder): IO[SendMessage] = {
-    parseDateAndDescription(command.text) match {
+    parseDateAndDescription(command.text, CommandCreateReminder.command) match {
       case Left(error: ReminderError) =>
         IO.pure(logger.error("Failed to create reminder", error.msg)) *>
           IO.pure(SendMessage(chatId = command.chatId, text = error.msgLocal))
@@ -42,7 +42,7 @@ class ReminderService(repository: ReminderRepository) extends StrictLogging {
   }
 
   def deleteReminder(delete: CommandDeleteReminder): IO[SendMessage] = {
-    parseDate(delete.text) match {
+    parseDate(delete.text, CommandDeleteReminder.command) match {
       case Left(error: ReminderError) =>
         IO.pure(logger.error("Failed to create reminder", error.msg)) *>
           IO.pure(SendMessage(chatId = delete.chatId, text = error.msgLocal))
@@ -71,8 +71,8 @@ class ReminderService(repository: ReminderRepository) extends StrictLogging {
     }
   }
 
-  private def parseDate(text: String): Either[ReminderError, LocalDate] = {
-    val textWithoutPrefix = text.stripPrefix(commandStr).drop(2)
+  private def parseDate(text: String, command: String): Either[ReminderError, LocalDate] = {
+    val textWithoutPrefix = text.stripPrefix(command).drop(1)
     val args = textWithoutPrefix.split(" ")
     if (args.length < 1) {
       Left(ReminderError("Not enough arguments", notEnoughArgsError))
@@ -84,14 +84,14 @@ class ReminderService(repository: ReminderRepository) extends StrictLogging {
     }
   }
 
-  private def parseDateAndDescription(text: String): Either[ReminderError, (LocalDate, String)] = {
-    val textWithoutPrefix = text.stripPrefix(commandStr).drop(2)
+  private def parseDateAndDescription(text: String, command: String): Either[ReminderError, (LocalDate, String)] = {
+    val textWithoutPrefix = text.stripPrefix(command).drop(1)
     val args = textWithoutPrefix.split(" ")
     if (args.length < 2) {
       Left(ReminderError("Not enough arguments", notEnoughArgsError))
     } else {
       val dateArg = args(0)
-      Try(LocalDate.parse(args(0), reminderDateFormatter))
+      Try(LocalDate.parse(dateArg, reminderDateFormatter))
         .map(Right(_))
         .getOrElse(Left(ReminderError(s"Failed to parse date $dateArg", invalidDateError)))
         .map { remindAt =>
@@ -103,7 +103,6 @@ class ReminderService(repository: ReminderRepository) extends StrictLogging {
 }
 
 object ReminderService {
-  val commandStr = "/nagadai"
   val reminderDateFormat = "dd.MM.yyyy" // TODO support date without year and take current year
   val reminderDateFormatter = DateTimeFormatter.ofPattern(reminderDateFormat)
 

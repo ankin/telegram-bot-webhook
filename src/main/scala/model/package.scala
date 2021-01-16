@@ -55,12 +55,23 @@ package object model {
   final object ActionUnsupported extends Action
 
   sealed trait Command extends Action
-  final object CommandNews extends Command
+  final object CommandNews extends Command {
+    val command = "/news"
+  }
 
   sealed trait CommandReminder extends Command
   final case class CommandCreateReminder(chatId: Int, userId: Int, text: String) extends CommandReminder
+  final object CommandCreateReminder {
+    val command = "/reminder_add"
+  }
   final case class CommandDeleteReminder(chatId: Int, userId: Int, text: String) extends CommandReminder
+  final object CommandDeleteReminder {
+    val command = "/reminder_del"
+  }
   final case class CommandShowReminders(chatId: Int, userId: Int) extends CommandReminder
+  final object CommandShowReminders {
+    val command = "/reminder_list"
+  }
 
   sealed trait Text extends Action
   case class TextMsg(text: String) extends Text

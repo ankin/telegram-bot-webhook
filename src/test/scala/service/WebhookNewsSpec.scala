@@ -53,7 +53,7 @@ class WebhookNewsSpec extends AnyWordSpec with Matchers {
 
     }
 
-    "handle /novyny" in {
+    "handle /news" in {
       val createJson =
         json"""
        {
@@ -76,7 +76,7 @@ class WebhookNewsSpec extends AnyWordSpec with Matchers {
                "is_bot": false
             },
             "entities": [{"type" : "bot_command"}],
-            "text":"/novyny"
+            "text":"/news"
           }
         }
     """
@@ -90,7 +90,7 @@ class WebhookNewsSpec extends AnyWordSpec with Matchers {
       }
     }
 
-    "handle /novyny command within text" in {
+    "handle /news command within text" in {
       val createJson =
         json"""
        {
@@ -113,7 +113,7 @@ class WebhookNewsSpec extends AnyWordSpec with Matchers {
                "is_bot": false
             },
             "entities": [{"type" : "bot_command"}],
-            "text":"bla bla bla /novyny"
+            "text":"bla bla bla /news"
           }
         }
     """
@@ -156,7 +156,7 @@ class WebhookNewsSpec extends AnyWordSpec with Matchers {
     """
       val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /novyny"))
+      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /news"))
     }
 
     "handle bold text" in {
@@ -188,7 +188,7 @@ class WebhookNewsSpec extends AnyWordSpec with Matchers {
     """
       val response = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createJson))
       response.status shouldBe Status.Ok
-      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /novyny"))
+      response.as[Json].unsafeRunSync().as[SendMessage] shouldBe Right(SendMessage(chatId = 1111111, text = "Я вмію тільки /news"))
     }
 
 

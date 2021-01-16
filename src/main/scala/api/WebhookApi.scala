@@ -55,10 +55,10 @@ class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) exten
     (update.message.text, update.message.from) match {
       case (Some(text), Some(user)) =>
         update.message.entities match {
-          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.contains("/novyny") => CommandNews
-          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith("/nagadai+") => CommandCreateReminder(chatId = update.message.chat.id, userId = user.id, text = text)
-          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith("/nagadai-") => CommandDeleteReminder(chatId = update.message.chat.id, userId = user.id, text = text)
-          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith("/nagadai?") => CommandShowReminders(chatId = update.message.chat.id, userId = user.id)
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.contains(CommandNews.command) => CommandNews
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith(CommandCreateReminder.command) => CommandCreateReminder(chatId = update.message.chat.id, userId = user.id, text = text)
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith(CommandDeleteReminder.command) => CommandDeleteReminder(chatId = update.message.chat.id, userId = user.id, text = text)
+          case Some(msgEntities) if msgEntities.exists(_.`type` == "bot_command") && text.startsWith(CommandShowReminders.command) => CommandShowReminders(chatId = update.message.chat.id, userId = user.id)
           case Some(_) => ActionUnsupported
           case _ => TextMsg(text)
         }
@@ -74,7 +74,7 @@ class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) exten
         } yield SendMessage(chatId = chatId, text = news.map(n => s"${n.title}\n${n.link}").mkString("\n\n"))
       case command: CommandReminder => reminderService.process(command)
       case TextMsg(text) => IO.pure(SendMessage(chatId = chatId, text = s"Шо? '$text'\nЯ ще не знаю шо з тим робити :("))
-      case ActionUnsupported => IO.pure(SendMessage(chatId = chatId, text = s"Я вмію тільки /novyny"))
+      case ActionUnsupported => IO.pure(SendMessage(chatId = chatId, text = s"Я вмію тільки /news"))
     }
   }
 

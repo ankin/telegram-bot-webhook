@@ -57,8 +57,8 @@ class WebhookReminderSpec extends AnyWordSpec with Matchers {
 
   "WebhookReminderSpec" should {
 
-    "handle /nagadai+, nagadai? and /nagadai-" in {
-      val createCmdJson = jsonWithCommand("/nagadai+ 13.02.2021 Valentines Day")
+    "handle /reminder_add, /reminder_list and /reminder_del" in {
+      val createCmdJson = jsonWithCommand("/reminder_add 13.02.2021 Valentines Day")
       val createCmdResponse = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(createCmdJson))
       createCmdResponse.status shouldBe Status.Ok
       createCmdResponse.as[Json].unsafeRunSync().as[SendMessage] match {
@@ -70,7 +70,7 @@ class WebhookReminderSpec extends AnyWordSpec with Matchers {
       }
 
 
-      val showCommandJson = jsonWithCommand("/nagadai?")
+      val showCommandJson = jsonWithCommand("/reminder_list")
       val showCmdResponse = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(showCommandJson))
       showCmdResponse.status shouldBe Status.Ok
       showCmdResponse.as[Json].unsafeRunSync().as[SendMessage] match {
@@ -81,7 +81,7 @@ class WebhookReminderSpec extends AnyWordSpec with Matchers {
         case Left(_) => fail()
       }
 
-      val deleteCmdJson = jsonWithCommand("/nagadai- 13.02.2021")
+      val deleteCmdJson = jsonWithCommand("/reminder_del 13.02.2021")
       val deleteCmdResponse = serve(Request[IO](POST, Uri.unsafeFromString(s"/webhook/$token")).withEntity(deleteCmdJson))
       deleteCmdResponse.status shouldBe Status.Ok
       deleteCmdResponse.as[Json].unsafeRunSync().as[SendMessage] match {
