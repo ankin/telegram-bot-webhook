@@ -18,7 +18,7 @@ import java.util.UUID
 class WebhookNewsSpec extends AnyWordSpec with Matchers {
 
   private val token = UUID.randomUUID().toString
-  private val service = new WebhookApi(Webhook(token, List.empty), null).routes
+  private val service = new WebhookApi(Webhook(token, "1111111"), null).routes
 
   "WebhookService" should {
     "handle text" in {

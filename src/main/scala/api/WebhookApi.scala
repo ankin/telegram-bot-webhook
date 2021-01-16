@@ -4,12 +4,12 @@ package api
 import cats.effect.IO
 import com.typesafe.scalalogging.StrictLogging
 import config.Webhook
-import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
+import io.circe.{Decoder, Encoder}
 import model._
 import org.http4s.circe._
 import org.http4s.dsl.Http4sDsl
-import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, MalformedMessageBodyFailure, Status}
+import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, MalformedMessageBodyFailure}
 import service.{ReminderService, RssFeedService}
 
 
@@ -23,7 +23,7 @@ class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) exten
     case req@POST -> Root / "webhook" / this.webhookConfig.token =>
 
       req.decode[Update] { update =>
-        if (webhookConfig.allowedChatIds.contains(update.message.chat.id)) {
+        if (!webhookConfig.allowedChatIds.contains(update.message.chat.id)) {
           // TODO add test
           logger.info(s"Unsupported chat with id=[${update.message.chat.id}]. Ignoring message")
           Forbidden()
@@ -50,11 +50,6 @@ class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) exten
 
   }
 
-  private def checkIfAllowed(chatId: Int, allowList: Set[Int], update: Update): Either[Status.BadRequest.type, Update] = {
-    Either.cond(allowList.contains(chatId), update, BadRequest)
-
-
-  }
 
   private def extractAction(update: Update): IO[Action] = IO {
     (update.message.text, update.message.from) match {

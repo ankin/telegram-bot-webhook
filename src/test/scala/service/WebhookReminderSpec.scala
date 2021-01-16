@@ -53,7 +53,7 @@ class WebhookReminderSpec extends AnyWordSpec with Matchers {
   }
 
   private val reminderService = new ReminderService(reminderRepository)
-  private val service = new WebhookApi(Webhook(token, List.empty), reminderService).routes
+  private val service = new WebhookApi(Webhook(token, "1111111"), reminderService).routes
 
   "WebhookReminderSpec" should {
 
