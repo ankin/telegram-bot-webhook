@@ -22,10 +22,8 @@ class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) exten
   val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req@POST -> Root / "webhook" / this.webhookConfig.token =>
 
-
       req.decode[Update] { update =>
-
-        if (webhookConfig.chatAllowList.contains(update.message.chat.id)) {
+        if (webhookConfig.allowedChatIds.contains(update.message.chat.id)) {
           // TODO add test
           logger.info(s"Unsupported chat with id=[${update.message.chat.id}]. Ignoring message")
           Forbidden()
