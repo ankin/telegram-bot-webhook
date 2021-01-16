@@ -85,8 +85,6 @@ package object model {
                        chatId: Int,
                        createdBy: Int,
                        createdAt: LocalDateTime = LocalDateTime.now(),
-                       updatedBy: Option[Int] = None,
-                       updateAt: Option[LocalDateTime] = None,
                        executedAt: Option[LocalDateTime] = None
                      )
 

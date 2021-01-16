@@ -6,6 +6,5 @@ CREATE TABLE IF NOT EXISTS reminder
     chatId INTEGER NOT NULL,
     createdBy INTEGER NOT NULL,
     createdAt TIMESTAMP NOT NULL,
-    updatedAt TIMESTAMP NULL,
     executedAt TIMESTAMP NULL
 );
