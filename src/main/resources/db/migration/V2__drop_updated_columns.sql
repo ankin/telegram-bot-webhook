@@ -1,0 +1,1 @@
+ALTER TABLE reminder DROP column updatedAt;
