@@ -16,6 +16,7 @@ import service.{ReminderService, RssFeedService}
 class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) extends Http4sDsl[IO] with StrictLogging {
 
   implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[IO, A] = jsonOf[IO, A]
+
   implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[IO, A] = jsonEncoderOf[IO, A]
 
 
