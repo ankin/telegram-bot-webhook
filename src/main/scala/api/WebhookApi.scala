@@ -12,12 +12,20 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.{EntityDecoder, EntityEncoder, HttpRoutes, MalformedMessageBodyFailure}
 import service.{ReminderService, RssFeedService}
 
+import java.net.http.{HttpRequest, HttpResponse}
+
 
 class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) extends Http4sDsl[IO] with StrictLogging {
 
   implicit def circeJsonDecoder[A: Decoder]: EntityDecoder[IO, A] = jsonOf[IO, A]
 
   implicit def circeJsonEncoder[A: Encoder]: EntityEncoder[IO, A] = jsonEncoderOf[IO, A]
+
+  import java.net.URI
+  import java.net.http.HttpClient
+
+  val client: HttpClient = HttpClient.newHttpClient
+  val request: HttpRequest = HttpRequest.newBuilder.uri(URI.create("http://curlmyip.org")).GET.build // GET is default
 
 
   val routes: HttpRoutes[IO] = HttpRoutes.of[IO] {
@@ -29,7 +37,10 @@ class WebhookApi(webhookConfig: Webhook, reminderService: ReminderService) exten
           logger.info(s"Unsupported chat with id=[${update.message.chat.id}]. Ignoring message")
           Forbidden()
         } else {
+          
           val requestHandler = for {
+            response <- IO(client.send(request, HttpResponse.BodyHandlers.ofString()))
+            _ <- IO(logger.info(s"========= Received response from http://curlmyip.org: [${response.body()}]"))
             _ <- IO(logger.info(s"Received update message: [${update.asJson.noSpaces}]"))
             action <- extractAction(update)
             responseEntity <- createResponse(action, update.message.chat.id)
